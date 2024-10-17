@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useApi } from '@/hooks/useApi';
 import { Pet } from '@/types/Pet';
@@ -16,6 +14,7 @@ interface PetSelectorProps {
 const PetSelector: React.FC<PetSelectorProps> = ({ onPetSelect }) => {
   const [pets, setPets] = useState<Pet[]>([]);
   const [newPet, setNewPet] = useState<Omit<Pet, 'id'>>({ name: '', species: '', age: 0, imageUrl: '', type: '' });
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { fetchPets, addPet, loading, error } = useApi();
 
   useEffect(() => {
@@ -38,6 +37,7 @@ const PetSelector: React.FC<PetSelectorProps> = ({ onPetSelect }) => {
       setPets(prevPets => [...prevPets, addedPet]);
       onPetSelect(addedPet);
       setNewPet({ name: '', species: '', age: 0, imageUrl: '', type: '' });
+      setDialogOpen(false); // Close dialog after adding pet
     }
   };
 
@@ -66,9 +66,9 @@ const PetSelector: React.FC<PetSelectorProps> = ({ onPetSelect }) => {
           <p>Aucun animal trouvé.</p>
         )}
         
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Ajouter un nouvel animal</Button>
+            <Button onClick={() => setDialogOpen(true)}>Ajouter un nouvel animal</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -92,9 +92,8 @@ const PetSelector: React.FC<PetSelectorProps> = ({ onPetSelect }) => {
                 <Input id="imageUrl" name="imageUrl" value={newPet.imageUrl} onChange={handleInputChange} />
               </div>
               <div className="flex justify-end space-x-2">
-
                 <Button type="submit">Ajouter</Button>
-                <Button type="button" variant="outline">Annuler</Button>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
               </div>
             </form>
           </DialogContent>
