@@ -42,7 +42,7 @@ jobs:
           lighthouse http://localhost:3000 --chrome-flags="--headless --no-sandbox --disable-gpu" --output=json --output-path=./lighthouse-report.json --only-categories=accessibility
 
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: lighthouse-report
           path: ./lighthouse-report.json
