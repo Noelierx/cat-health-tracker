@@ -48,6 +48,7 @@ const PetSelector: React.FC<PetSelectorProps> = ({ onPetSelect }) => {
 
   return (
     <div>
+      <h1>Select a pet</h1>
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       <div className="space-y-4">
