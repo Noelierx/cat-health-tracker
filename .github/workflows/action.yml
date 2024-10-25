@@ -1,41 +1,47 @@
 name: accessibility check
 
 on:
-  pull_request:
-   branches:
+  push:
+    branches:
       - master
+  pull_request:
 
 jobs:
- accessibility:
-  runs-on: ubuntu-latest
+  accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  steps:
-  - name: Checkout code
-  uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-  - name: Set up Node.js
-  uses: actions/setup-node@v3
-  with:
-    node-version: '16'
+      - name: Install dependencies
+        run: npm install
 
-  - name: Install dependencies
-  run: npm install
+      - name: Start build
+        run: npm run build
 
-  - name : Start server
-  run: npm start &
-  env:
-    CI: true
+      - name: Start server
+        run: |
+          npm start &
+          sleep 5  # Delay to allow server to start
+        env:
+          CI: true
 
-  - name: Run Pa11y check
-  run: npx pa11y-ci
+      - name: Run Pa11y check
+        run: npx pa11y-ci
 
-  - name: Run Lighthouse tests
-  run: |
-    npm install -g lighthouse
-    lighthouse http://localhost:3000 - output=json --output-path=./lightouse-report.json --only-categories=accessibility
+      - name: Run Lighthouse tests
+        run: |
+          npm install -g lighthouse wait-on
+          wait-on http://localhost:3000  # Wait for server readiness
+          lighthouse http://localhost:3000 --chrome-flags="--headless --no-sandbox --disable-gpu" --output=json --output-path=./lighthouse-report.json --only-categories=accessibility
 
-  - name: Upload Lighthouse report
-  uses: actions/upload-artifact@v2
-  with: 
-    name: lighthouse-report
-    path: ./lighthouse-report.json
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with: 
+          name: lighthouse-report
+          path: ./lighthouse-report.json
