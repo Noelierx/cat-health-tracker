@@ -1,34 +1,43 @@
 name: accessibility check
 
 on:
-  pull_request:
-   branches:
+  push:
+    branches:
       - master
+  pull_request:
 
 jobs:
   accessibility:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-      uses: actions/checkout@v2
+        uses: actions/checkout@v2
+
       - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
       - name: Install dependencies
-      run: npm install
-      - name : Start server
-      run: npm start &
-      env:
-        CI: true
+        run: npm install
+
+      - name: Start server
+        run: |
+          npm start &
+          sleep 5  # Delay to allow server to start
+        env:
+          CI: true
+
       - name: Run Pa11y check
-      run: npx pa11y-ci
+        run: npx pa11y-ci
+
       - name: Run Lighthouse tests
-      run: |
-        npm install -g lighthouse
-        lighthouse http://localhost:3000 - output=json --output-path=./lightouse-report.json --only-categories=accessibility
+        run: |
+          npm install -g lighthouse
+          lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-report.json --only-categories=accessibility
+
       - name: Upload Lighthouse report
-      uses: actions/upload-artifact@v2
-      with: 
-        name: lighthouse-report
-        path: ./lighthouse-report.json
+        uses: actions/upload-artifact@v2
+        with: 
+          name: lighthouse-report
+          path: ./lighthouse-report.json
